@@ -32,61 +32,65 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] },
     loadComponent: () => import('./features/catalog/units/units').then(m => m.Units)
   },
+
   {
     path: 'catalog/procedures',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'ODONTOLOGO'] },
+    data: { roles: ['ADMIN'] },
     loadComponent: () => import('./features/catalog/procedures/procedures').then(m => m.Procedures)
   },
 
   {
     path: 'inventory/entries',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'AUXILIAR'] },
+    data: { roles: ['ADMIN'] },
     loadComponent: () => import('./features/inventory/entries/entries').then(m => m.Entries)
   },
+
   {
     path: 'inventory/exits',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN', 'AUXILIAR'] },
     loadComponent: () => import('./features/inventory/exits/exits').then(m => m.Exits)
   },
+
   {
     path: 'inventory/movements',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN', 'AUXILIAR'] },
     loadComponent: () => import('./features/inventory/movements/movements').then(m => m.Movements)
   },
+
   {
     path: 'inventory/alerts',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'AUXILIAR'] },
+    data: { roles: ['ADMIN', 'AUXILIAR', 'ODONTOLOGO'] },
     loadComponent: () => import('./features/inventory/alerts/alerts').then(m => m.Alerts)
   },
 
   {
     path: 'visits/create',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'AUXILIAR', 'ODONTOLOGO'] },
+    data: { roles: ['ODONTOLOGO'] },
     loadComponent: () => import('./features/visits/create-visit/create-visit').then(m => m.CreateVisit)
   },
   {
     path: 'visits/:id/consume',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'AUXILIAR', 'ODONTOLOGO'] },
+    data: { roles: ['ODONTOLOGO'] },
     loadComponent: () => import('./features/visits/consume/consume').then(m => m.Consume)
   },
   {
     path: 'visits/:id',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'AUXILIAR', 'ODONTOLOGO'] },
+    data: { roles: ['ODONTOLOGO'] },
     loadComponent: () => import('./features/visits/visit-detail/visit-detail').then(m => m.VisitDetail)
   },
 
   {
     path: 'reports/clinical-detail',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'ODONTOLOGO'] },
+    data: { roles: ['ADMIN'] },
     loadComponent: () => import('./features/reports/clinical-detail/clinical-detail').then(m => m.ClinicalDetail)
   },
   {
