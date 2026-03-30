@@ -96,6 +96,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/reports/consumption/consumption').then(m => m.Consumption)
   },
 
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: '**', redirectTo: 'home' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' },
 ];

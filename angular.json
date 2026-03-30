@@ -67,7 +67,10 @@
               "buildTarget": "odonto-frontend:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+              "options": {
+      "allowedHosts": ["b5cf-181-63-25-115.ngrok-free.app"]
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"

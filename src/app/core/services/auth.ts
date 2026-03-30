@@ -52,7 +52,7 @@ export class Auth {
 
   me(): Observable<MeResponse> {
     return from(
-      fetch(`${environment.apiUrl}/auth/auth/me`, {
+      fetch(`${environment.apiUrl}/auth/me`, {
         headers: {
           Authorization: `Bearer ${this.getToken()}`
         }
