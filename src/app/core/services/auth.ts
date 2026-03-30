@@ -54,7 +54,8 @@ export class Auth {
     return from(
       fetch(`${environment.apiUrl}/auth/me`, {
         headers: {
-          Authorization: `Bearer ${this.getToken()}`
+          Authorization: `Bearer ${this.getToken()}`,
+          'ngrok-skip-browser-warning': '1'
         }
       }).then(async (response) => {
         if (!response.ok) {
