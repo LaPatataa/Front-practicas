@@ -16,7 +16,7 @@ export class App {
   logout(): void {
     this.auth.logout().subscribe({
       next: () => {
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     });
   }
