@@ -1,0 +1,125 @@
+<div class="app-page">
+  <div class="page-header">
+    <h1>Movimientos</h1>
+    <p>Consulta entradas, salidas y ajustes del inventario con filtros.</p>
+  </div>
+
+  <section class="panel">
+    <h2>Filtros</h2>
+
+    <div class="filters-grid">
+      <div class="field">
+        <label for="insumo">Insumo</label>
+        <select id="insumo" [(ngModel)]="filters.insumo_id" [disabled]="loadingSupplies">
+          <option value="">Todos</option>
+          @for (item of supplies; track item.id) {
+            <option [value]="item.id">{{ item.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="tipo">Tipo</label>
+        <select id="tipo" [(ngModel)]="filters.tipo">
+          @for (item of movementTypes; track item.value) {
+            <option [value]="item.value">{{ item.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="lote_id">Lote ID</label>
+        <input
+          id="lote_id"
+          type="text"
+          [(ngModel)]="filters.lote_id"
+          placeholder="UUID del lote"
+        />
+      </div>
+
+      <div class="field">
+        <label for="atencion_id">Atención ID</label>
+        <input
+          id="atencion_id"
+          type="text"
+          [(ngModel)]="filters.atencion_id"
+          placeholder="UUID de atención"
+        />
+      </div>
+
+      <div class="field">
+        <label for="desde">Desde</label>
+        <input
+          id="desde"
+          type="date"
+          [(ngModel)]="filters.desde"
+        />
+      </div>
+
+      <div class="field">
+        <label for="hasta">Hasta</label>
+        <input
+          id="hasta"
+          type="date"
+          [(ngModel)]="filters.hasta"
+        />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" (click)="search()" [disabled]="loading">
+        {{ loading ? 'Consultando...' : 'Buscar' }}
+      </button>
+      <button type="button" class="secondary" (click)="clearFilters()" [disabled]="loading">
+        Limpiar
+      </button>
+    </div>
+  </section>
+
+  @if (error) {
+    <div class="state error">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="state">Cargando movimientos...</div>
+  }
+
+  @if (!loading && !error && movements.length === 0) {
+    <div class="state">No hay movimientos para mostrar.</div>
+  }
+
+  @if (!loading && !error && movements.length > 0) {
+    <section class="panel">
+      <h2>Listado de movimientos</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Motivo</th>
+              <th>Lote</th>
+              <th>Atención</th>
+              <th>Creado en</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of movements; track item.id) {
+              <tr>
+                <td>{{ getSupplyName(item.insumo_id) }}</td>
+                <td>{{ item.tipo }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.motivo || '—' }}</td>
+                <td>{{ item.lote_id || '—' }}</td>
+                <td>{{ getRelatedAttention(item) }}</td>
+                <td>{{ item.creado_en ? (item.creado_en | date:'short') : '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

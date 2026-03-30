@@ -1,0 +1,132 @@
+<div class="app-page">
+  <section class="app-hero">
+    <div class="app-hero-copy">
+      <span class="app-hero-kicker">MONITOREO</span>
+      <h1>Alertas</h1>
+      <p>
+        Consulta alertas de stock mínimo y vencimiento de lotes para anticipar
+        faltantes o pérdidas de insumos.
+      </p>
+    </div>
+  </section>
+
+  <div class="app-layout-two alerts-layout">
+    <section class="app-panel">
+      <div class="app-panel-header">
+        <h2>Alertas de stock mínimo</h2>
+        <p>Listado de insumos cuyo stock actual está por debajo del mínimo definido.</p>
+      </div>
+
+```
+  @if (loadingStockMin) {
+    <div class="app-empty-state">
+      <h3>Cargando alertas</h3>
+      <p>Espera un momento mientras se consulta la información.</p>
+    </div>
+  }
+
+  @if (!loadingStockMin && stockMinAlerts.length === 0) {
+    <div class="app-empty-state">
+      <h3>Sin alertas de stock mínimo</h3>
+      <p>No hay insumos por debajo del nivel mínimo configurado.</p>
+    </div>
+  }
+
+  @if (!loadingStockMin && stockMinAlerts.length > 0) {
+    <div class="app-table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Insumo</th>
+            <th>Stock actual</th>
+            <th>Stock mínimo</th>
+            <th>Categoría</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of stockMinAlerts; track item.id) {
+            <tr>
+              <td class="app-strong-cell">{{ getStockName(item) }}</td>
+              <td>{{ getStockActual(item) }}</td>
+              <td>{{ getStockMinimo(item) }}</td>
+              <td>{{ getStockCategory(item) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<section class="app-panel">
+  <div class="app-panel-header">
+    <h2>Alertas de vencimiento</h2>
+    <p>Consulta lotes próximos a vencer dentro del rango configurado.</p>
+  </div>
+
+  <div class="app-toolbar alerts-toolbar">
+    <div class="app-field">
+      <label for="dias">Días</label>
+      <input
+        id="dias"
+        type="number"
+        min="1"
+        [(ngModel)]="days"
+      />
+    </div>
+
+    <div class="app-toolbar-actions">
+      <button
+        class="app-btn app-btn-primary"
+        type="button"
+        (click)="loadExpiryAlerts()">
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  @if (loadingExpiry) {
+    <div class="app-empty-state">
+      <h3>Cargando alertas</h3>
+      <p>Espera un momento mientras se consulta la información.</p>
+    </div>
+  }
+
+  @if (!loadingExpiry && expiryAlerts.length === 0) {
+    <div class="app-empty-state">
+      <h3>Sin alertas de vencimiento</h3>
+      <p>No hay lotes próximos a vencer en el rango seleccionado.</p>
+    </div>
+  }
+
+  @if (!loadingExpiry && expiryAlerts.length > 0) {
+    <div class="app-table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Insumo</th>
+            <th>Código lote</th>
+            <th>Fecha vencimiento</th>
+            <th>Estado</th>
+            <th>Cantidad actual</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of expiryAlerts; track item.id) {
+            <tr>
+              <td class="app-strong-cell">{{ getExpirySupplyName(item) }}</td>
+              <td>{{ item.codigo }}</td>
+              <td>{{ item.vence_en | date:'yyyy-MM-dd' }}</td>
+              <td>{{ getExpiryStatus(item.vence_en) }}</td>
+              <td>{{ item.cantidad_actual }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+```
+
+  </div>
+</div>

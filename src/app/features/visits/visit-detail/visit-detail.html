@@ -1,0 +1,100 @@
+<div class="app-page">
+  <div class="page-header">
+    <h1>Detalle de atención</h1>
+    <p>Consulta los datos generales, consumos clínicos y movimientos asociados.</p>
+  </div>
+
+  @if (loading) {
+    <div class="state">Cargando atención...</div>
+  }
+
+  @if (!loading && error) {
+    <div class="state error">{{ error }}</div>
+  }
+
+  @if (!loading && detail) {
+    <section class="panel">
+      <h2>Datos de la atención</h2>
+
+      <div class="detail-grid">
+        <div><strong>ID:</strong> {{ detail.atencion.id }}</div>
+        <div><strong>Paciente:</strong> {{ detail.atencion.id_externo_paciente || '—' }}</div>
+        <div><strong>Procedimiento ID:</strong> {{ detail.atencion.procedimiento_id }}</div>
+        <div><strong>Realizado por:</strong> {{ detail.atencion.realizado_por }}</div>
+        <div><strong>Realizado en:</strong> {{ detail.atencion.realizado_en | date:'short' }}</div>
+        <div><strong>Creado en:</strong> {{ detail.atencion.creado_en | date:'short' }}</div>
+        <div class="full"><strong>Notas:</strong> {{ detail.atencion.notas || '—' }}</div>
+      </div>
+
+      <div class="actions">
+        <button type="button" (click)="goToConsume()">Consumir insumos</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Consumos clínicos</h2>
+
+      @if (!hasConsumptions()) {
+        <div class="state">No hay consumos registrados.</div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Insumo</th>
+                <th>Cantidad</th>
+                <th>Creado en</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of detail.consumos; track item.id) {
+                <tr>
+                  <td>{{ getSupplyName(item.insumo_id) }}</td>
+                  <td>{{ item.cantidad }}</td>
+                  <td>{{ item.creado_en | date:'short' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <h2>Movimientos ligados</h2>
+
+      @if (!hasMovements()) {
+        <div class="state">No hay movimientos registrados.</div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Insumo</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Motivo</th>
+                <th>Lote</th>
+                <th>Atención relacionada</th>
+                <th>Creado en</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of detail.movimientos; track item.id) {
+                <tr>
+                  <td>{{ getSupplyName(item.insumo_id) }}</td>
+                  <td>{{ item.tipo }}</td>
+                  <td>{{ item.cantidad }}</td>
+                  <td>{{ item.motivo || '—' }}</td>
+                  <td>{{ item.lote_id || '—' }}</td>
+                  <td>{{ getMovementRelatedAttention(item) }}</td>
+                  <td>{{ item.creado_en ? (item.creado_en | date:'short') : '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

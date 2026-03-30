@@ -1,0 +1,97 @@
+<div class="app-page">
+  <div class="page-header">
+    <h1>Consumir insumos por atención</h1>
+    <p>Usa los insumos por defecto del procedimiento y asígnales lote para descontar inventario.</p>
+  </div>
+
+  @if (loading) {
+    <div class="state">Cargando información...</div>
+  }
+
+  @if (!loading && error) {
+    <div class="state error">{{ error }}</div>
+  }
+
+  @if (!loading && detail) {
+    <section class="panel">
+      <h2>Atención</h2>
+
+      <div class="detail-grid">
+        <div><strong>ID:</strong> {{ detail.atencion.id }}</div>
+        <div><strong>Paciente:</strong> {{ detail.atencion.id_externo_paciente || '—' }}</div>
+        <div><strong>Procedimiento ID:</strong> {{ detail.atencion.procedimiento_id }}</div>
+        <div><strong>Realizado en:</strong> {{ detail.atencion.realizado_en | date:'short' }}</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Consumo</h2>
+
+      <div class="field full">
+        <label for="motivo">Motivo</label>
+        <input
+          id="motivo"
+          type="text"
+          [(ngModel)]="motivo"
+          placeholder="Consumo por atención"
+        />
+      </div>
+
+      @if (items.length === 0) {
+        <div class="state">Este procedimiento no tiene insumos por defecto configurados.</div>
+      }
+
+      @if (items.length > 0) {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Insumo</th>
+                <th>Cantidad</th>
+                <th>Lote</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items; track item.insumo_id) {
+                <tr>
+                  <td>{{ item.insumo_nombre }}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      [(ngModel)]="item.cantidad"
+                    />
+                  </td>
+                  <td>
+                    <select [(ngModel)]="item.lote_id">
+                      <option value="">Selecciona un lote</option>
+                      @for (lot of item.lots; track lot.id) {
+                        <option [value]="lot.id">
+                          {{ lot.codigo }} — disponible: {{ lot.cantidad_actual }} — vence: {{ lot.vence_en }}
+                        </option>
+                      }
+                    </select>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (success) {
+        <div class="state success">{{ success }}</div>
+      }
+
+      <div class="actions">
+        <button type="button" (click)="submit()" [disabled]="saving || loading || items.length === 0">
+          {{ saving ? 'Guardando...' : 'Registrar consumo' }}
+        </button>
+        <button type="button" class="secondary" (click)="goToDetail()">
+          Volver al detalle
+        </button>
+      </div>
+    </section>
+  }
+</div>

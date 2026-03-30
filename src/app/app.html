@@ -1,0 +1,58 @@
+@if (auth.isAuthenticated()) {
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-text">
+          <h1>Inventario</h1>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a routerLink="/home" routerLinkActive="active">Inicio</a>
+
+        @if (auth.hasAnyRole(['ADMIN', 'AUXILIAR', 'ODONTOLOGO'])) {
+          <a routerLink="/clients" routerLinkActive="active">Clientes</a>
+        }
+
+        @if (auth.hasAnyRole(['ADMIN'])) {
+          <a routerLink="/catalog/supplies" routerLinkActive="active">Insumos</a>
+          <a routerLink="/catalog/units" routerLinkActive="active">Unidades</a>
+        }
+
+        @if (auth.hasAnyRole(['ADMIN', 'ODONTOLOGO'])) {
+          <a routerLink="/catalog/procedures" routerLinkActive="active">Procedimientos</a>
+        }
+
+        @if (auth.hasAnyRole(['ADMIN', 'AUXILIAR'])) {
+          <a routerLink="/inventory/entries" routerLinkActive="active">Inventario</a>
+          <a routerLink="/inventory/movements" routerLinkActive="active">Movimientos</a>
+          <a routerLink="/inventory/alerts" routerLinkActive="active">Alertas</a>
+        }
+
+        @if (auth.hasAnyRole(['ADMIN', 'AUXILIAR', 'ODONTOLOGO'])) {
+          <a routerLink="/visits/create" routerLinkActive="active">Atenciones</a>
+        }
+
+        @if (auth.hasAnyRole(['ADMIN'])) {
+          <a routerLink="/reports/consumption" routerLinkActive="active">Reporte Consumo</a>
+        }
+
+        @if (auth.hasAnyRole(['ADMIN', 'ODONTOLOGO'])) {
+          <a routerLink="/reports/clinical-detail" routerLinkActive="active">Reporte Clínico</a>
+        }
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" class="logout-btn" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <main class="page-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+} @else {
+  <router-outlet></router-outlet>
+}

@@ -1,0 +1,98 @@
+<div class="home-page">
+  <section class="hero-card">
+    <div class="hero-copy">
+      <span class="eyebrow">Sistema de Inventario Odontológico</span>
+      <h1>Bienvenido</h1>
+      <p>
+        Gestiona pacientes, inventario, procedimientos, atenciones y reportes
+        desde una sola plataforma con control por roles.
+      </p>
+
+      <div class="hero-pills">
+        <span class="pill">Seguro</span>
+        <span class="pill">Clínico</span>
+        <span class="pill">Trazable</span>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="visual-card">
+        <strong>{{ auth.getStoredMe()?.email || 'Usuario autenticado' }}</strong>
+        <p>Accesos visibles según rol asignado.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="access-section">
+    <div class="section-head">
+      <h2>Accesos rápidos</h2>
+      <p>Selecciona el módulo que quieres abrir.</p>
+    </div>
+
+    <div class="access-grid">
+      @if (auth.hasAnyRole(['ADMIN', 'AUXILIAR', 'ODONTOLOGO'])) {
+        <a routerLink="/clients" class="access-card">
+          <h3>Clientes</h3>
+          <p>Registrar y consultar pacientes.</p>
+        </a>
+      }
+
+      @if (auth.hasAnyRole(['ADMIN'])) {
+        <a routerLink="/catalog/supplies" class="access-card">
+          <h3>Insumos</h3>
+          <p>Administrar catálogo de insumos.</p>
+        </a>
+
+        <a routerLink="/catalog/units" class="access-card">
+          <h3>Unidades</h3>
+          <p>Gestionar unidades de medida.</p>
+        </a>
+      }
+
+      @if (auth.hasAnyRole(['ADMIN', 'ODONTOLOGO'])) {
+        <a routerLink="/catalog/procedures" class="access-card">
+          <h3>Procedimientos</h3>
+          <p>Configurar procedimientos e insumos por defecto.</p>
+        </a>
+      }
+
+      @if (auth.hasAnyRole(['ADMIN', 'AUXILIAR'])) {
+        <a routerLink="/inventory/entries" class="access-card">
+          <h3>Inventario</h3>
+          <p>Entradas, salidas y consulta de lotes.</p>
+        </a>
+
+        <a routerLink="/inventory/movements" class="access-card">
+          <h3>Movimientos</h3>
+          <p>Auditoría completa del inventario.</p>
+        </a>
+
+        <a routerLink="/inventory/alerts" class="access-card">
+          <h3>Alertas</h3>
+          <p>Stock mínimo y vencimientos.</p>
+        </a>
+      }
+
+      @if (auth.hasAnyRole(['ADMIN', 'AUXILIAR', 'ODONTOLOGO'])) {
+        <a routerLink="/visits/create" class="access-card">
+          <h3>Atenciones</h3>
+          <p>Crear y gestionar atenciones clínicas.</p>
+        </a>
+      }
+
+      @if (auth.hasAnyRole(['ADMIN'])) {
+        <a routerLink="/reports/consumption" class="access-card">
+          <h3>Reporte de Consumo</h3>
+          <p>Totales por insumo o procedimiento.</p>
+        </a>
+      }
+
+      @if (auth.hasAnyRole(['ADMIN', 'ODONTOLOGO'])) {
+        <a routerLink="/reports/clinical-detail" class="access-card">
+          <h3>Reporte Clínico</h3>
+          <p>Detalle de paciente, procedimiento e insumos.</p>
+        </a>
+      }
+    </div>
+  </section>
+</div>

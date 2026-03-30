@@ -1,0 +1,96 @@
+<div class="app-page">
+  <div class="page-header">
+    <h1>Reporte clínico detallado</h1>
+    <p>Consulta atenciones con paciente, procedimiento, fecha, profesional, insumo, cantidad y lote.</p>
+  </div>
+
+  <section class="panel">
+    <h2>Filtros</h2>
+
+    <div class="filters-grid">
+      <div class="field">
+        <label for="desde">Desde</label>
+        <input id="desde" type="date" [(ngModel)]="filters.desde" />
+      </div>
+
+      <div class="field">
+        <label for="hasta">Hasta</label>
+        <input id="hasta" type="date" [(ngModel)]="filters.hasta" />
+      </div>
+
+      <div class="field">
+        <label for="q">Buscar</label>
+        <input
+          id="q"
+          type="text"
+          [(ngModel)]="filters.q"
+          placeholder="Paciente, procedimiento, insumo, lote, profesional"
+          (keyup.enter)="search()"
+        />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" (click)="search()" [disabled]="loading">
+        {{ loading ? 'Consultando...' : 'Generar reporte' }}
+      </button>
+      <button type="button" class="secondary" (click)="clearFilters()" [disabled]="loading">
+        Limpiar
+      </button>
+      <button type="button" class="secondary" (click)="exportPdf()" [disabled]="loading || exportingPdf || rows.length === 0">
+        {{ exportingPdf ? 'Generando PDF...' : 'PDF' }}
+      </button>
+    </div>
+  </section>
+
+  @if (error) {
+    <div class="state error">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="state">Cargando reporte...</div>
+  }
+
+  @if (!loading && !error && rows.length === 0) {
+    <div class="state">No hay resultados para ese rango de fechas.</div>
+  }
+
+  @if (!loading && !error && rows.length > 0) {
+    <section class="panel">
+      <h2>Resultados</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente ID</th>
+              <th>Paciente</th>
+              <th>Procedimiento</th>
+              <th>Fecha/Hora</th>
+              <th>Profesional</th>
+              <th>Insumo</th>
+              <th>Cantidad</th>
+              <th>Lote</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track row.movimiento_id) {
+              <tr>
+                <td>{{ row.paciente_id_externo || '—' }}</td>
+                <td>{{ row.paciente_nombre || '—' }}</td>
+                <td>{{ row.procedimiento_nombre || row.procedimiento_id || '—' }}</td>
+                <td>{{ row.realizado_en ? (row.realizado_en | date:'short') : '—' }}</td>
+                <td>{{ row.realizado_por || '—' }}</td>
+                <td>{{ row.insumo_nombre || row.insumo_id || '—' }}</td>
+                <td>{{ row.cantidad ?? '—' }}</td>
+                <td>{{ row.lote_codigo || row.lote_id || '—' }}</td>
+                <td>{{ row.motivo || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

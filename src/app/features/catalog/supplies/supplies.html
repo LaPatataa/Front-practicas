@@ -1,0 +1,212 @@
+<div class="supplies-page">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">CATÁLOGO DE INSUMOS</span>
+      <h1>Insumos</h1>
+      <p>
+        Registra, consulta y filtra los insumos disponibles para inventario y
+        procedimientos clínicos.
+      </p>
+    </div>
+  </section>
+
+  <div class="supplies-layout">
+    <section class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Nuevo insumo</h2>
+          <p>
+            Crea un insumo indicando su categoría, unidad de medida, stock mínimo
+            y estado actual.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input
+            id="nombre"
+            type="text"
+            [(ngModel)]="form.nombre"
+            placeholder="Ej. Resina"
+          />
+        </div>
+
+        <div class="field">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" [(ngModel)]="form.categoria">
+            <option value="DISPOSITIVO_MEDICO">Dispositivo médico</option>
+            <option value="MEDICAMENTO">Medicamento</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="unidad">Unidad</label>
+          <select id="unidad" [(ngModel)]="form.unidad_id">
+            <option [ngValue]="null" disabled>Selecciona una unidad</option>
+            @for (unit of units; track unit.id) {
+              <option [ngValue]="unit.id">
+                {{ unit.nombre }} ({{ unit.simbolo }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="stock_minimo">Stock mínimo</label>
+          <input
+            id="stock_minimo"
+            type="number"
+            min="0"
+            step="0.01"
+            [(ngModel)]="form.stock_minimo"
+            placeholder="Ej. 10"
+          />
+        </div>
+
+        <div class="field full">
+          <label class="toggle-card" for="activo">
+            <input id="activo" type="checkbox" [(ngModel)]="form.activo" />
+            <span class="toggle-indicator"></span>
+            <span class="toggle-copy">
+              <strong>Insumo activo</strong>
+              <small>Permite que el insumo esté disponible en los listados del sistema.</small>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      @if (formError) {
+        <div class="feedback feedback-error">
+          {{ formError }}
+        </div>
+      }
+
+      @if (formSuccess) {
+        <div class="feedback feedback-success">
+          {{ formSuccess }}
+        </div>
+      }
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="createSupply()"
+          [disabled]="saving || loadingUnits"
+        >
+          {{ saving ? 'Guardando...' : 'Crear insumo' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetForm()"
+          [disabled]="saving"
+        >
+          Limpiar formulario
+        </button>
+      </div>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="panel-header panel-header-inline">
+        <div>
+          <h2>Listado de insumos</h2>
+          <p>
+            Busca rápidamente insumos por nombre o categoría y revisa su estado,
+            unidad y niveles mínimos.
+          </p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="field search-field">
+          <label for="q">Buscar</label>
+          <input
+            id="q"
+            type="text"
+            [(ngModel)]="q"
+            placeholder="Nombre o categoría"
+            (keyup.enter)="search()"
+          />
+        </div>
+
+        <label class="toggle-card compact-toggle" for="onlyActive">
+          <input id="onlyActive" type="checkbox" [(ngModel)]="onlyActive" (change)="search()" />
+          <span class="toggle-indicator"></span>
+          <span class="toggle-copy">
+            <strong>Solo activos</strong>
+            <small>Filtra únicamente los insumos habilitados.</small>
+          </span>
+        </label>
+
+        <div class="toolbar-actions">
+          <button type="button" class="btn btn-primary" (click)="search()">
+            Buscar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="empty-state">
+          <h3>Cargando insumos</h3>
+          <p>Espera un momento mientras se consulta la información.</p>
+        </div>
+      }
+
+      @if (!loading && error) {
+        <div class="feedback feedback-error">
+          {{ error }}
+        </div>
+      }
+
+      @if (!loading && !error && supplies.length === 0) {
+        <div class="empty-state">
+          <h3>No hay insumos para mostrar</h3>
+          <p>No se encontraron registros con los filtros actuales.</p>
+        </div>
+      }
+
+      @if (!loading && !error && supplies.length > 0) {
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Unidad</th>
+                <th>Stock actual</th>
+                <th>Stock mínimo</th>
+                <th>Estado</th>
+                <th>Creado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of supplies; track item.id) {
+                <tr>
+                  <td class="strong-cell">{{ item.nombre }}</td>
+                  <td>{{ item.categoria || 'Sin categoría' }}</td>
+                  <td>{{ getUnitLabel(item.unidad_id) }}</td>
+                  <td><span class="value-pill">{{ item.stock_actual }}</span></td>
+                  <td>{{ item.stock_minimo }}</td>
+                  <td>
+                    <span class="status-badge" [class.status-inactive]="!item.activo">
+                      {{ item.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>{{ item.creado_en | date:'medium' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</div>

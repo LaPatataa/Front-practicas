@@ -1,0 +1,314 @@
+<div class="procedures-page">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">CATÁLOGO CLÍNICO</span>
+      <h1>Procedimientos</h1>
+      <p>
+        Crea procedimientos clínicos y define los insumos por defecto que se
+        consumirán en cada atención.
+      </p>
+    </div>
+  </section>
+
+  @if (pageError) {
+    <div class="feedback feedback-error">
+      {{ pageError }}
+    </div>
+  }
+
+  <div class="procedures-layout">
+    <section class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Nuevo procedimiento</h2>
+          <p>
+            Registra un procedimiento con su nombre y una descripción breve para
+            dejarlo disponible en el sistema.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="proc_nombre">Nombre</label>
+          <input
+            id="proc_nombre"
+            type="text"
+            [(ngModel)]="procedureForm.nombre"
+            placeholder="Ej. Limpieza dental"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="proc_descripcion">Descripción</label>
+          <input
+            id="proc_descripcion"
+            type="text"
+            [(ngModel)]="procedureForm.descripcion"
+            placeholder="Describe brevemente el procedimiento"
+          />
+        </div>
+      </div>
+
+      @if (procedureError) {
+        <div class="feedback feedback-error">
+          {{ procedureError }}
+        </div>
+      }
+
+      @if (procedureSuccess) {
+        <div class="feedback feedback-success">
+          {{ procedureSuccess }}
+        </div>
+      }
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="createProcedure()"
+          [disabled]="savingProcedure"
+        >
+          {{ savingProcedure ? 'Guardando...' : 'Crear procedimiento' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetProcedureForm()"
+          [disabled]="savingProcedure"
+        >
+          Limpiar
+        </button>
+      </div>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="panel-header panel-header-inline">
+        <div>
+          <h2>Listado de procedimientos</h2>
+          <p>
+            Consulta los procedimientos registrados y selecciona uno para
+            gestionar sus insumos por defecto.
+          </p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="field search-field">
+          <label for="q">Buscar</label>
+          <input
+            id="q"
+            type="text"
+            [(ngModel)]="q"
+            placeholder="Buscar por nombre"
+            (keyup.enter)="searchProcedures()"
+          />
+        </div>
+
+        <div class="toolbar-actions">
+          <button type="button" class="btn btn-primary" (click)="searchProcedures()">
+            Buscar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="clearProcedureFilters()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      @if (loadingProcedures) {
+        <div class="empty-state">
+          <h3>Cargando procedimientos</h3>
+          <p>Espera un momento mientras se consulta la información.</p>
+        </div>
+      }
+
+      @if (!loadingProcedures && procedures.length === 0) {
+        <div class="empty-state">
+          <h3>No hay procedimientos para mostrar</h3>
+          <p>No se encontraron registros con los filtros actuales.</p>
+        </div>
+      }
+
+      @if (!loadingProcedures && procedures.length > 0) {
+        <div class="selector-shell">
+          <div class="field">
+            <label for="selectedProcedure">Procedimiento seleccionado</label>
+            <select
+              id="selectedProcedure"
+              [(ngModel)]="selectedProcedureId"
+              (change)="onProcedureChange()"
+            >
+              @for (item of procedures; track item.id) {
+                <option [value]="item.id">
+                  {{ item.nombre }} {{ item.activo ? '' : '(Inactivo)' }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Fecha de creación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of procedures; track item.id) {
+                <tr [class.row-selected]="item.id === selectedProcedureId">
+                  <td class="strong-cell">{{ item.nombre }}</td>
+                  <td>{{ item.descripcion || 'Sin descripción registrada' }}</td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class.status-inactive]="!item.activo"
+                    >
+                      {{ item.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>{{ item.creado_en | date:'medium' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+
+  <section class="panel defaults-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Insumos por defecto</h2>
+        <p>
+          Configura el consumo base del procedimiento seleccionado para usarlo
+          automáticamente en el flujo clínico.
+        </p>
+      </div>
+    </div>
+
+    @if (!selectedProcedureId) {
+      <div class="empty-state">
+        <h3>Selecciona un procedimiento</h3>
+        <p>
+          Primero elige un procedimiento en el listado para administrar sus
+          insumos por defecto.
+        </p>
+      </div>
+    }
+
+    @if (selectedProcedureId) {
+      <div class="selected-procedure-banner">
+        <span class="banner-label">Procedimiento activo</span>
+        <strong>{{ getSelectedProcedureName() }}</strong>
+      </div>
+
+      <div class="form-grid defaults-grid">
+        <div class="field">
+          <label for="default_insumo">Insumo</label>
+          <select
+            id="default_insumo"
+            [(ngModel)]="defaultForm.insumo_id"
+            [disabled]="loadingSupplies || savingDefault || !selectedProcedureId"
+          >
+            @for (item of supplies; track item.id) {
+              <option [value]="item.id">
+                {{ item.nombre }} (stock actual: {{ item.stock_actual }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="default_cantidad">Cantidad por defecto</label>
+          <input
+            id="default_cantidad"
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="defaultForm.cantidad_default"
+            placeholder="Ej. 1.00"
+          />
+        </div>
+      </div>
+
+      @if (defaultsError) {
+        <div class="feedback feedback-error">
+          {{ defaultsError }}
+        </div>
+      }
+
+      @if (defaultSuccess) {
+        <div class="feedback feedback-success">
+          {{ defaultSuccess }}
+        </div>
+      }
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="addDefault()"
+          [disabled]="savingDefault || !selectedProcedureId"
+        >
+          {{ savingDefault ? 'Guardando...' : 'Agregar insumo por defecto' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetDefaultForm()"
+          [disabled]="savingDefault"
+        >
+          Limpiar
+        </button>
+      </div>
+
+      @if (loadingDefaults) {
+        <div class="empty-state">
+          <h3>Cargando insumos por defecto</h3>
+          <p>Espera un momento mientras se consulta la configuración.</p>
+        </div>
+      }
+
+      @if (!loadingDefaults && defaults.length === 0) {
+        <div class="empty-state">
+          <h3>Sin insumos configurados</h3>
+          <p>Este procedimiento todavía no tiene insumos por defecto.</p>
+        </div>
+      }
+
+      @if (!loadingDefaults && defaults.length > 0) {
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Insumo</th>
+                <th>Cantidad por defecto</th>
+                <th>Unidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of defaults; track trackDefault($index, item)) {
+                <tr>
+                  <td class="strong-cell">
+                    {{ item.insumo?.nombre || item.insumo_id }}
+                  </td>
+                  <td>
+                    <span class="quantity-pill">{{ item.cantidad_default }}</span>
+                  </td>
+                  <td>{{ getUnitLabel(item.insumo?.unidad_id) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+</div>

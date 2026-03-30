@@ -1,0 +1,90 @@
+<div class="app-page">
+  <div class="page-header">
+    <h1>Crear atención</h1>
+    <p>Registra una nueva atención clínica asociada a un procedimiento.</p>
+  </div>
+
+  <section class="panel">
+    <div class="form-grid">
+      <div class="field">
+        <label for="paciente">ID externo paciente</label>
+        <input
+          id="paciente"
+          type="text"
+          [(ngModel)]="form.id_externo_paciente"
+          placeholder="Ej. PAC-001"
+        />
+      </div>
+
+      <div class="field">
+        <label for="procedimiento">Procedimiento</label>
+        <select
+          id="procedimiento"
+          [(ngModel)]="form.procedimiento_id"
+          [disabled]="loadingProcedures || saving"
+        >
+          @for (item of procedures; track item.id) {
+            <option [value]="item.id">
+              {{ getProcedureLabel(item) }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="realizado_en">Fecha y hora</label>
+        <input
+          id="realizado_en"
+          type="datetime-local"
+          [(ngModel)]="form.realizado_en"
+        />
+      </div>
+
+      <div class="field full">
+        <label for="notas">Notas</label>
+        <textarea
+          id="notas"
+          rows="4"
+          [(ngModel)]="form.notas"
+          placeholder="Observaciones de la atención"
+        ></textarea>
+      </div>
+    </div>
+
+        @if (error) {
+      <div class="state error">{{ error }}</div>
+    }
+
+    @if (patientNotFound) {
+      <div class="actions">
+        <button type="button" class="secondary" (click)="goToClients()">
+          Ir a registrar cliente
+        </button>
+      </div>
+    }
+
+    @if (success) {
+      <div class="state success">{{ success }}</div>
+    }
+
+    @if (createdVisitId) {
+      <div class="state">
+        Atención creada con id: <strong>{{ createdVisitId }}</strong>
+      </div>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="submit()" [disabled]="saving || loadingProcedures">
+        {{ saving ? 'Guardando...' : 'Crear atención' }}
+      </button>
+
+      <button type="button" class="secondary" (click)="resetForm()" [disabled]="saving">
+        Limpiar
+      </button>
+
+      <button type="button" class="secondary" (click)="goToDetail()" [disabled]="!createdVisitId">
+        Ver detalle
+      </button>
+    </div>
+  </section>
+</div>

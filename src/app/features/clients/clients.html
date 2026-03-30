@@ -1,0 +1,185 @@
+<div class="clients-page">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">GESTIÓN DE CLIENTES</span>
+      <h1>{{ isEditing() ? 'Actualizar cliente' : 'Registrar cliente' }}</h1>
+      <p>
+        Administra la información básica de los pacientes y mantén actualizado
+        el registro para usarlo en atenciones y reportes clínicos.
+      </p>
+    </div>
+  </section>
+
+  <div class="clients-layout">
+    <section class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>{{ isEditing() ? 'Editar registro' : 'Nuevo registro' }}</h2>
+          <p>
+            {{ isEditing()
+              ? 'Modifica nombre o dirección del cliente seleccionado.'
+              : 'Completa la información del nuevo cliente.' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="id_externo">ID externo</label>
+          <input
+            id="id_externo"
+            type="text"
+            [(ngModel)]="form.id_externo"
+            placeholder="Ej. 1117487350"
+            [disabled]="isEditing()"
+          />
+          <small class="field-hint">
+            Este identificador se usa para vincular atenciones con el paciente.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="nombre">Nombre completo</label>
+          <input
+            id="nombre"
+            type="text"
+            [(ngModel)]="form.nombre"
+            placeholder="Nombre del paciente"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="direccion">Dirección</label>
+          <input
+            id="direccion"
+            type="text"
+            [(ngModel)]="form.direccion"
+            placeholder="Dirección de residencia"
+          />
+        </div>
+      </div>
+
+      @if (error) {
+        <div class="feedback feedback-error">
+          {{ error }}
+        </div>
+      }
+
+      @if (success) {
+        <div class="feedback feedback-success">
+          {{ success }}
+        </div>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Guardando...' : (isEditing() ? 'Guardar cambios' : 'Crear cliente') }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetForm()"
+          [disabled]="saving || isEditing()"
+        >
+          Limpiar
+        </button>
+
+        @if (isEditing()) {
+          <button
+            type="button"
+            class="btn btn-ghost"
+            (click)="cancelEdit()"
+            [disabled]="saving"
+          >
+            Cancelar edición
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="panel-header panel-header-inline">
+        <div>
+          <h2>Listado de clientes</h2>
+          <p>Consulta y localiza rápidamente pacientes registrados.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="field search-field">
+          <label for="q">Buscar</label>
+          <input
+            id="q"
+            type="text"
+            [(ngModel)]="q"
+            placeholder="Buscar por ID, nombre o dirección"
+            (keyup.enter)="search()"
+          />
+        </div>
+
+        <div class="toolbar-actions">
+          <button type="button" class="btn btn-primary" (click)="search()">
+            Buscar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="empty-state">
+          <h3>Cargando clientes</h3>
+          <p>Espera un momento mientras se consulta la información.</p>
+        </div>
+      }
+
+      @if (!loading && clients.length === 0) {
+        <div class="empty-state">
+          <h3>No hay clientes para mostrar</h3>
+          <p>
+            Aún no hay registros que coincidan con la búsqueda actual.
+          </p>
+        </div>
+      }
+
+      @if (!loading && clients.length > 0) {
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>ID externo</th>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Fecha de creación</th>
+                <th class="actions-col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of clients; track item.id_externo) {
+                <tr [class.row-editing]="editingIdExterno === item.id_externo">
+                  <td>
+                    <span class="id-badge">{{ item.id_externo }}</span>
+                  </td>
+                  <td class="strong-cell">{{ item.nombre }}</td>
+                  <td>{{ item.direccion || 'Sin dirección registrada' }}</td>
+                  <td>{{ item.creado_en | date:'medium' }}</td>
+                  <td class="actions-col">
+                    <button
+                      type="button"
+                      class="table-action"
+                      (click)="startEdit(item)"
+                    >
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</div>

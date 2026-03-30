@@ -1,0 +1,113 @@
+<div class="app-page">
+  <div class="page-header">
+    <h1>Reporte de consumo</h1>
+    <p>Consulta el consumo agrupado por insumo o por procedimiento.</p>
+  </div>
+
+  <section class="panel">
+    <h2>Filtros</h2>
+
+    <div class="filters-grid">
+      <div class="field">
+        <label for="desde">Desde</label>
+        <input
+          id="desde"
+          type="date"
+          [(ngModel)]="filters.desde"
+        />
+      </div>
+
+      <div class="field">
+        <label for="hasta">Hasta</label>
+        <input
+          id="hasta"
+          type="date"
+          [(ngModel)]="filters.hasta"
+        />
+      </div>
+
+      <div class="field">
+        <label for="group">Agrupar por</label>
+        <select id="group" [(ngModel)]="filters.group">
+          <option value="insumo">Insumo</option>
+          <option value="procedimiento">Procedimiento</option>
+        </select>
+      </div>
+
+      <div class="field checkbox-field">
+        <label>
+          <input type="checkbox" [(ngModel)]="filters.only_clinical" />
+          Solo clínico
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" (click)="search()" [disabled]="loading">
+        {{ loading ? 'Consultando...' : 'Generar reporte' }}
+      </button>
+      <button type="button" class="secondary" (click)="clearFilters()" [disabled]="loading">
+        Limpiar
+      </button>
+    </div>
+  </section>
+
+  <div class="actions">
+  <button type="button" (click)="search()" [disabled]="loading">
+    {{ loading ? 'Consultando...' : 'Generar reporte' }}
+  </button>
+  <button type="button" class="secondary" (click)="clearFilters()" [disabled]="loading">
+    Limpiar
+  </button>
+  <button type="button" class="secondary" (click)="exportPdf()" [disabled]="loading || exportingPdf || rows.length === 0">
+    {{ exportingPdf ? 'Generando PDF...' : 'PDF' }}
+  </button>
+</div>
+
+  @if (error) {
+    <div class="state error">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="state">Cargando reporte...</div>
+  }
+
+  @if (!loading && !error && rows.length === 0) {
+    <div class="state">No hay resultados para ese rango de fechas.</div>
+  }
+
+  @if (!loading && !error && rows.length > 0) {
+    <section class="panel">
+      <h2>Resultados</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              @if (isGroupBySupply()) {
+                <th>Insumo</th>
+                <th>Unidad</th>
+              } @else {
+                <th>Procedimiento</th>
+              }
+              <th>Cantidad total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track $index) {
+              <tr>
+                @if (isGroupBySupply()) {
+                  <td>{{ getSupplyRow(row).insumo_nombre }}</td>
+                  <td>{{ getUnitLabel(getSupplyRow(row).unidad_id) }}</td>
+                } @else {
+                  <td>{{ getProcedureRow(row).procedimiento_nombre }}</td>
+                }
+                <td>{{ row.cantidad_total }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

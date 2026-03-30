@@ -1,0 +1,13 @@
+.alerts-layout {
+  grid-template-columns: 1fr;
+}
+
+.alerts-toolbar {
+  grid-template-columns: 160px auto;
+}
+
+@media (max-width: 760px) {
+  .alerts-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

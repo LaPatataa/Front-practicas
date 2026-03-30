@@ -1,0 +1,131 @@
+<div class="units-page">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">CONFIGURACIÓN BASE</span>
+      <h1>Unidades</h1>
+      <p>
+        Administra las unidades de medida disponibles en el sistema para usarlas
+        en insumos, inventario y procedimientos clínicos.
+      </p>
+    </div>
+  </section>
+
+  <div class="units-layout">
+    <section class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Nueva unidad</h2>
+          <p>
+            Registra una unidad de medida con su nombre completo y su símbolo
+            para mantener estandarizado el catálogo.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input
+            id="nombre"
+            type="text"
+            [(ngModel)]="form.nombre"
+            placeholder="Ej. Mililitro"
+          />
+        </div>
+
+        <div class="field">
+          <label for="simbolo">Símbolo</label>
+          <input
+            id="simbolo"
+            type="text"
+            [(ngModel)]="form.simbolo"
+            placeholder="Ej. ml"
+          />
+        </div>
+      </div>
+
+      @if (error) {
+        <div class="feedback feedback-error">
+          {{ error }}
+        </div>
+      }
+
+      @if (success) {
+        <div class="feedback feedback-success">
+          {{ success }}
+        </div>
+      }
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="createUnit()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Guardando...' : 'Crear unidad' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetForm()"
+          [disabled]="saving"
+        >
+          Limpiar
+        </button>
+      </div>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="panel-header panel-header-inline">
+        <div>
+          <h2>Listado de unidades</h2>
+          <p>
+            Consulta las unidades registradas y revisa rápidamente su símbolo y
+            fecha de creación.
+          </p>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="empty-state">
+          <h3>Cargando unidades</h3>
+          <p>Espera un momento mientras se consulta la información.</p>
+        </div>
+      }
+
+      @if (!loading && units.length === 0) {
+        <div class="empty-state">
+          <h3>No hay unidades para mostrar</h3>
+          <p>Aún no se han registrado unidades de medida en el sistema.</p>
+        </div>
+      }
+
+      @if (!loading && units.length > 0) {
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Símbolo</th>
+                <th>Creado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of units; track item.id) {
+                <tr>
+                  <td class="strong-cell">{{ item.nombre }}</td>
+                  <td>
+                    <span class="symbol-pill">{{ item.simbolo }}</span>
+                  </td>
+                  <td>{{ item.creado_en | date:'medium' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</div>

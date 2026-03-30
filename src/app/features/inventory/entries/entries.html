@@ -1,0 +1,322 @@
+<div class="inventory-page">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">GESTIÓN DE INVENTARIO</span>
+      <h1>Inventario</h1>
+      <p>
+        Registra entradas, salidas y consulta lotes desde una sola pantalla para
+        mantener trazabilidad del stock clínico.
+      </p>
+    </div>
+  </section>
+
+  @if (error) {
+    <div class="feedback feedback-error">
+      {{ error }}
+    </div>
+  }
+
+  <div class="inventory-grid">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Registrar entrada</h2>
+          <p>
+            Agrega existencias nuevas indicando lote, vencimiento, cantidad y motivo.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="entry_insumo">Insumo</label>
+          <select
+            id="entry_insumo"
+            [(ngModel)]="entryForm.insumo_id"
+            (change)="onEntrySupplyChange()"
+            [disabled]="loadingSupplies || savingEntry"
+          >
+            @for (item of supplies; track item.id) {
+              <option [value]="item.id">{{ getSupplyLabel(item) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="entry_codigo_lote">Código de lote</label>
+          <input
+            id="entry_codigo_lote"
+            type="text"
+            [(ngModel)]="entryForm.codigo_lote"
+            placeholder="Ej. LOTE-001"
+          />
+        </div>
+
+        <div class="field">
+          <label for="entry_vence_en">Fecha de vencimiento</label>
+          <input
+            id="entry_vence_en"
+            type="date"
+            [(ngModel)]="entryForm.vence_en"
+          />
+        </div>
+
+        <div class="field">
+          <label for="entry_cantidad">Cantidad</label>
+          <input
+            id="entry_cantidad"
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="entryForm.cantidad"
+            placeholder="0.00"
+          />
+        </div>
+
+        <div class="field full">
+          <label for="entry_motivo">Motivo de entrada</label>
+          <select id="entry_motivo" [(ngModel)]="entryForm.motivo">
+            @for (reason of entryReasons; track reason.value) {
+              <option [value]="reason.value">{{ reason.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (entryError) {
+        <div class="feedback feedback-error">{{ entryError }}</div>
+      }
+
+      @if (entrySuccess) {
+        <div class="feedback feedback-success">{{ entrySuccess }}</div>
+      }
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="submitEntry()"
+          [disabled]="savingEntry || loadingSupplies"
+        >
+          {{ savingEntry ? 'Guardando...' : 'Registrar entrada' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetEntryForm(entryForm.insumo_id)"
+          [disabled]="savingEntry"
+        >
+          Limpiar
+        </button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Registrar salida</h2>
+          <p>
+            Descuenta stock seleccionando lote, tipo de salida, cantidad y motivo.
+          </p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="exit_insumo">Insumo</label>
+          <select
+            id="exit_insumo"
+            [(ngModel)]="exitForm.insumo_id"
+            (change)="onExitSupplyChange()"
+            [disabled]="loadingSupplies || savingExit"
+          >
+            @for (item of supplies; track item.id) {
+              <option [value]="item.id">{{ getSupplyLabel(item) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="exit_lote">Lote</label>
+          <select
+            id="exit_lote"
+            [(ngModel)]="exitForm.lote_id"
+            [disabled]="loadingLots || savingExit"
+          >
+            @for (lot of getLotsForExit(); track lot.id) {
+              <option [value]="lot.id">
+                {{ lot.codigo }} — disponible: {{ lot.cantidad_actual }} — vence: {{ lot.vence_en }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="exit_tipo">Tipo de salida</label>
+          <select id="exit_tipo" [(ngModel)]="exitForm.tipo">
+            @for (type of exitTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="exit_cantidad">Cantidad</label>
+          <input
+            id="exit_cantidad"
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="exitForm.cantidad"
+            placeholder="0.00"
+          />
+        </div>
+
+        <div class="field">
+          <label for="exit_motivo">Motivo de salida</label>
+          <select id="exit_motivo" [(ngModel)]="exitForm.motivo">
+            @for (reason of exitReasons; track reason.value) {
+              <option [value]="reason.value">{{ reason.label }}</option>
+            }
+          </select>
+        </div>
+
+        @if (requiresVisit()) {
+          <div class="field">
+            <label for="exit_atencion">Atención relacionada</label>
+            <select
+              id="exit_atencion"
+              [(ngModel)]="exitForm.atencion_relacionada"
+              [disabled]="loadingVisits || savingExit"
+            >
+              <option value="">Selecciona una atención</option>
+              @for (visit of visits; track visit.id) {
+                <option [value]="visit.id">
+                  {{ getVisitLabel(visit) }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+
+      @if (exitError) {
+        <div class="feedback feedback-error">{{ exitError }}</div>
+      }
+
+      @if (exitSuccess) {
+        <div class="feedback feedback-success">{{ exitSuccess }}</div>
+      }
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="submitExit()"
+          [disabled]="savingExit || loadingSupplies || loadingLots || loadingVisits"
+        >
+          {{ savingExit ? 'Guardando...' : 'Registrar salida' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetExitForm(exitForm.insumo_id)"
+          [disabled]="savingExit"
+        >
+          Limpiar
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Lotes del insumo</h2>
+        <p>
+          Consulta los lotes registrados por insumo y revisa su cantidad disponible y vencimiento.
+        </p>
+      </div>
+    </div>
+
+    <div class="toolbar lots-toolbar">
+      <div class="field search-field">
+        <label for="lots_insumo">Insumo</label>
+        <select
+          id="lots_insumo"
+          [(ngModel)]="selectedSupplyIdForLots"
+          [disabled]="loadingSupplies || loadingLots"
+        >
+          @for (item of supplies; track item.id) {
+            <option [value]="item.id">{{ getSupplyLabel(item) }}</option>
+          }
+        </select>
+      </div>
+
+      <label class="toggle-card" for="onlyAvailableLots">
+        <input id="onlyAvailableLots" type="checkbox" [(ngModel)]="onlyAvailableLots" />
+        <span class="toggle-indicator"></span>
+        <span class="toggle-copy">
+          <strong>Solo disponibles</strong>
+          <small>Oculta lotes sin cantidad disponible.</small>
+        </span>
+      </label>
+
+      <div class="toolbar-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="loadLotsForSelectedSupply()"
+          [disabled]="loadingLots || loadingSupplies"
+        >
+          {{ loadingLots ? 'Consultando...' : 'Consultar lotes' }}
+        </button>
+      </div>
+    </div>
+
+    @if (lotsError) {
+      <div class="feedback feedback-error">{{ lotsError }}</div>
+    }
+
+    @if (loadingLots) {
+      <div class="empty-state">
+        <h3>Cargando lotes</h3>
+        <p>Espera un momento mientras se consulta la información.</p>
+      </div>
+    }
+
+    @if (!loadingLots && !lotsError && lots.length === 0) {
+      <div class="empty-state">
+        <h3>No hay lotes para mostrar</h3>
+        <p>No se encontraron lotes para el insumo seleccionado.</p>
+      </div>
+    }
+
+    @if (!loadingLots && !lotsError && lots.length > 0) {
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Vence en</th>
+              <th>Cantidad actual</th>
+              <th>Creado en</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lot of lots; track lot.id) {
+              <tr>
+                <td class="strong-cell">{{ lot.codigo }}</td>
+                <td>{{ lot.vence_en }}</td>
+                <td><span class="value-pill">{{ lot.cantidad_actual }}</span></td>
+                <td>{{ lot.creado_en | date:'medium' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>
